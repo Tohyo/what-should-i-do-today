@@ -12,7 +12,7 @@ type MR struct {
 	WebURL string `json:"web_url"`
 }
 
-func GetOpenedMRs(url string, token string) ([]MR, error) {
+func GetMRs(url string, token string) ([]MR, error) {
 	var mrs []MR
 
 	req, err := http.NewRequest("GET", url, nil)

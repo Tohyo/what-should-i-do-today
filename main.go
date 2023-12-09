@@ -17,7 +17,8 @@ func main() {
 	}
 
 	todoistChan := make(chan []todoist.Task)
-	gitlabChan := make(chan []gitlab.MR)
+	gitlabMRChan := make(chan []gitlab.MR)
+	gitlabReviewChan := make(chan []gitlab.MR)
 
 	go func () {
 		defer close(todoistChan)
@@ -34,9 +35,9 @@ func main() {
 	}()
 
 	go func () {
-		defer close(gitlabChan)
+		defer close(gitlabMRChan)
 
-		mrs, err := gitlab.GetOpenedMRs(
+		mrs, err := gitlab.GetMRs(
 			os.Getenv("GITLAB_URL") + "/api/v4/merge_requests?state=opened&scope=all&author_id=" + os.Getenv("GITLAB_USER_ID"),
 			os.Getenv("GITLAB_PERSONAL_TOKEN"),
 		)
@@ -45,14 +46,47 @@ func main() {
 			log.Fatal(err)
 		}
 
-		gitlabChan <- mrs
+		gitlabMRChan <- mrs
 	}()
 
-	for _, task := range <-todoistChan {
-		fmt.Println(task.Content)
-	}
+	go func () {
+		defer close(gitlabReviewChan)
 
-	for _, mr := range <-gitlabChan {
+		mrs, err := gitlab.GetMRs(
+			os.Getenv("GITLAB_URL") + "/api/v4/merge_requests?state=opened&scope=all&reviewer_id=" + os.Getenv("GITLAB_USER_ID"),
+			os.Getenv("GITLAB_PERSONAL_TOKEN"),
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		gitlabReviewChan <- mrs
+	}()
+
+	fmt.Println("*******************************")
+	fmt.Println("*** What should I do today? ***")
+	fmt.Println("*******************************")
+	fmt.Println("")
+
+	fmt.Println("*** Todoist tasks ***")
+	for _, task := range <-todoistChan {
+		fmt.Println("# " + task.Content)
+	}
+	fmt.Println("*********************")
+	fmt.Println("")
+
+	fmt.Println("*** Gitlab MRs ***")
+	for _, mr := range <-gitlabMRChan {
 		fmt.Println(mr.Title + ": " + mr.WebURL)
 	}
+	fmt.Println("******************")
+	fmt.Println("")
+
+	fmt.Println("*** Gitlab Reviews ***")
+	for _, mr := range <-gitlabReviewChan {
+		fmt.Println(mr.Title + ": " + mr.WebURL)
+	}
+	fmt.Println("***********************")
+
 }
