@@ -1,6 +1,7 @@
 package todoist
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,4 +37,30 @@ func GetTodoistTasks(url string, token string) ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func CreateTask(url string, token string, content string, projectId string) error {
+	values := map[string]string{
+		"content": content, 
+		"project_id": projectId,
+	}
+	jsonData, err := json.Marshal(values)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return nil
 }

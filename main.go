@@ -88,5 +88,16 @@ func main() {
 		fmt.Println(mr.Title + ": " + mr.WebURL)
 	}
 	fmt.Println("***********************")
+	fmt.Println("")
 
+	var newTask string
+	fmt.Println("Voulez-vous créer une nouvelle tâche ?")
+	fmt.Scanf("%s", &newTask)
+
+	todoist.CreateTask(
+		"https://api.todoist.com/rest/v2/tasks",
+		os.Getenv("TODOIST_API_KEY"),
+		newTask,
+		os.Getenv("TODOIST_PROJECT_ID"),
+	)
 }
