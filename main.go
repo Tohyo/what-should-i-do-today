@@ -24,7 +24,7 @@ func main() {
 		defer close(todoistChan)
 
 		tasks, err := todoist.GetTodoistTasks(
-			"https://api.todoist.com/rest/v2/tasks", 
+			"https://api.todoist.com/rest/v2/tasks?project_id=" + os.Getenv("TODOIST_PROJECT_ID"), 
 			os.Getenv("TODOIST_API_KEY"),
 		)
 		if err != nil {
