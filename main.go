@@ -48,14 +48,11 @@ func main() {
 		gitlabChan <- mrs
 	}()
 
-	var todoistTasks = <-todoistChan
-	var gitlabMRs = <-gitlabChan
-
-	for _, task := range todoistTasks {
+	for _, task := range <-todoistChan {
 		fmt.Println(task.Content)
 	}
 
-	for _, mr := range gitlabMRs {
+	for _, mr := range <-gitlabChan {
 		fmt.Println(mr.Title + ": " + mr.WebURL)
 	}
 }
