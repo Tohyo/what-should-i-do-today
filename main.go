@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -90,14 +91,14 @@ func main() {
 	fmt.Println("***********************")
 	fmt.Println("")
 
-	var newTask string
 	fmt.Println("Voulez-vous créer une nouvelle tâche ?")
-	fmt.Scanf("%s", &newTask)
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
 
 	todoist.CreateTask(
 		"https://api.todoist.com/rest/v2/tasks",
 		os.Getenv("TODOIST_API_KEY"),
-		newTask,
+		scanner.Text(),
 		os.Getenv("TODOIST_PROJECT_ID"),
 	)
 }
